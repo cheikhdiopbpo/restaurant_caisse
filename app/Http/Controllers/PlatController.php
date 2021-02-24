@@ -8,6 +8,7 @@ use Image;
 use Illuminate\Support\Facades\File;
 use App\Categorie;
 use App\Plat;
+use App\Ticket;
 class PlatController extends Controller
 {
     /**
@@ -170,7 +171,7 @@ class PlatController extends Controller
 
         foreach($plats as $item){
 
-            $html = $html . "<div class='block col-md-2.5 text-center' style='width: 15rem; margin-bottom: 15px;' id='$item->id'  onclick='return checkItem($item);'>
+            $html = $html . "<div class='block col-md-2.5 text-center' style='width: 15rem; margin-bottom: 15px;' id='$item->id'  onclick='return checkItem($item);' draggable='true' ondragstart='return retirer($item);'>
                                 <p class='my-3 prod-name'>".strtoupper($item->libelle)."</p> <img class='image' src='images/$item->image' title='$item->description' >
                                 <div class='price'>
                                     <h6 class='mb-0'>".strtolower($item->prix) ."F cfa</h6>
@@ -182,5 +183,23 @@ class PlatController extends Controller
       
         return $html;
 
+    }
+
+
+    public function saveTicket(Request $request){
+         $id_ticket = \uniqid();
+         ['id_ticket','libelle','qt','prix','date_enreg'];
+
+         $date = now()->format('Y-m-d');
+        //  dd($request->ticket);
+        foreach($request->ticket  as $item){
+            $data = array('id_ticket'=> $id_ticket, "libelle"=> $item["libelle"] , "qt"=> $item["qt"], "prix"=>$item["prix"],"date_enreg"=>$date);
+            $ticket = new Ticket();
+            $ticket->create($data);
+        }
+       
+
+        return 0 ;
+       
     }
 }

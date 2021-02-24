@@ -7,13 +7,15 @@
              <div class="col-md-3"  style="border:2px solid #4e4e4d;height: 900px;">
                   <div>
                             <p style="text-align: center; font-weight: bold;">Panier</p>
+                            <p style="text-align: right" ><i class='fa fa-trash ' style='color:red;' onclick='return vider_panier();' > Vider le panier</i></p>
                   </div>
                   <div>
                       <table class="table">
                           <thead>
                               <th>Libelle</th>
-                              <th>Prix</th>
                               <th>Qt</th>
+                              <th>Prix</th>
+                              <th>Total</th>
                               <th>Actions</th>
                           </thead>
                           <tbody id="panier">
@@ -23,19 +25,22 @@
                       </table>
                   </div>
                   <div style="border: 3px dotted #4e4e4d">
-                       <p id="total_panier" style="font-weight: bold"> 0 f cfa</p>
+                       <p id="total_panier" style="font-weight: bold;text-align:right"> 0 f cfa</p>
                   </div>
                   <div >
                     <br>
-                      <button class="btn btn-primary float-right" id="valide">valider</button>
+                      <button class="btn btn-primary float-right" id="valide">Valider & Imprimer</button>
                   </div>
              </div>
              
              <div class="col-md-9" >
               
                <div class="row">
-                    <div class="col-md-12"  style="background-color: #9e9d9a">
-              
+                    <div class="col-md-8"  style="background-color: #9e9d9a">
+                        <p style="text-align: center;font-weight: bold;font-size: 17px;"><marquee>RESTAURAN MAFATIHUL BICHRI</marquee></p>
+                    </div>
+                    <div class="col-md-4"  style="background-color: #9e9d9a">
+                           
                             <nav class="navbar float-right" >
                                     <div class="form-group">
                                         <select name="categorie_id" id="categorie_id" class="form-control">
@@ -54,9 +59,9 @@
                                          
                                             @foreach($result as $item)
                                            
-                                                <div class="block col-md-2.5 text-center" style="width: 15rem;margin-bottom: 15px;" id="{{$item->id}}"   onclick="return checkItem({{$item}});">
+                                                <div class="block col-md-2.5 text-center" style="width: 15rem;margin-bottom: 15px;" id="{{$item->id}}"   onclick="return checkItem({{$item}});" draggable="true" ondragstart="return retirer({{$item}});">
                                                     <p class="my-3 prod-name" > {{ strtoupper($item->libelle) }}</p> <img class="image" src="images/{{$item->image}}">
-                                                    <div class=" price ">
+                                                    <div class="price  active">
                                                         <h6 class="mb-0">{{ strtolower($item->prix) }} F cfa</h6>
                                                     </div>
                                                 </div>
@@ -78,25 +83,21 @@
 @push('page_scripts')
      <script>
 var panier = [];
-$(document).ready(function(){
-    // $(".block").toggleClass('active');
-    // $(".price").removeClass('active');
-    // $(".active .price").addClass('active');
 
-});
 $('#valide').click(function(){
     html = "<body>";
     html = html +"<p style='text-align:center;margin-top:5px;'><b>RESTAURANT MAFATIHUL BICHRI<b></p>";
     html = html +"<p style='text-align:center;margin-top:-17px;'>Adresse: Castor</p>";
     html = html +"<p style='text-align:center;margin-top:-17px;'>Tel: 77 859 96 96</p>";
-    html = html +"<div class='conatiner'><table class='table  table-bordered table-sm'><tr><td>Libelle</td><td>Prix</td><td>Qt</td></tr>";
+    html = html +"<div class='conatiner'><table class='table  table-bordered table-sm'><tr><td>Libelle</td><td>Qt</td><td>Prix</td><td>Total</td></tr>";
     total = 0;
     panier.forEach(element => {
         total = total + (element.prix * element.qt);
         html = html + "<tr>";
             html = html + "<td>"+element.libelle+"</td>";
-            html = html + "<td>"+element.prix+"</td>";
             html = html + "<td>"+element.qt+"</td>";
+            html = html + "<td>"+element.prix+"</td>";
+            html = html + "<td>"+ Math.round((element.qt * element.prix)*100)/100 +"</td>";
         html = html + "</tr>";
     });
     html = html + "</table></div>";
@@ -112,8 +113,21 @@ $('#valide').click(function(){
             jsPDF:        { unit: 'in', format: 'a7', orientation: 'portrait' }
         };
 
-    html2pdf(html,opt);
+            html2pdf(html,opt);
+
+            $.ajax({
+                type:'GET',
+                url:"{{ route('save.ticket')}}",
+                data: {'ticket': panier},
+                success:function(data) {
+                 
+                    }
+                });
 });
+function vider_panier(){
+    panier = [];
+    charge_panier();
+}
 function checkItem(item){
     data = item;
      $("#"+data['id']+".block").toggleClass('active');
@@ -147,6 +161,38 @@ function checkItem(item){
     charge_panier();
 }
 
+function retirer(item){
+    //console.log(item);
+    data = item;
+     $("#"+data['id']+".block").toggleClass('active');
+     $("#"+data['id']+" .price").removeClass('active');
+     $("#"+data['id']+".price.active").addClass('active');
+   
+    if(panier.length > 0)
+    {
+      var cpt = 0;
+      var index;
+      panier.forEach(function(el,key) {
+           if(el.id == data["id"])
+           {
+             cpt = 1;
+             index = key;
+           }
+      });
+      if(cpt == 1)
+      {
+        if(panier[index].qt > 1)
+          {
+            panier[index].qt =  panier[index].qt - 1 ;
+          }
+     
+      }
+     
+    }
+
+    charge_panier();
+}
+
 
 function charge_panier()
 {   
@@ -156,8 +202,9 @@ function charge_panier()
         total = total + (element.prix * element.qt);
         html = html + "<tr>";
             html = html + "<td>"+element.libelle+"</td>";
-            html = html + "<td>"+element.prix+"</td>";
             html = html + "<td>"+element.qt+"</td>";
+            html = html + "<td>"+element.prix+"</td>";
+            html = html + "<td>"+Math.round((element.qt * element.prix)*100)/100 +"</td>";
             html = html + "<td><i class='fa fa-trash ' style='color:red' onclick='return sup_item("+element.id+");' ></i></td>";
         html = html + "</tr>";
     });

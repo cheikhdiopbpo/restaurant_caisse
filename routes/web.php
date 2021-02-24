@@ -43,3 +43,12 @@ Route::group( ['middleware' => ['auth']], function() {
 Route::get('/plats/destroy/{id}','PlatController@destroy')->name('plats_destroy');
 Route::get('/show_plats','PlatController@showPlatByCategorie')->name('showPlat');
 Route::get('/show_plats/serveur','PlatController@showPlatByCategorieForSerevur')->name('showPlat.serveur');
+Route::get('/save_ticket','PlatController@saveTicket')->name('save.ticket');
+
+
+
+////
+
+
+
+Route::get('/inventaire/index','Inventaire@index')->name('inventaire.index');

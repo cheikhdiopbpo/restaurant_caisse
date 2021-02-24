@@ -52,9 +52,15 @@
         </a>
       </li>
       @endcan
-     
+      <li class="nav-item">
+        <a href="{{ route('inventaire.index') }}" class="nav-link active">
+          <i class="far fa-circle nav-icon"></i>
+          <p>Inventaire</p>
+        </a>
+      </li>
 
     </ul>
   </li>
+  
 
   @endif
