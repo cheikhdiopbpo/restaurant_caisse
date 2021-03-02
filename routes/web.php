@@ -52,3 +52,5 @@ Route::get('/save_ticket','PlatController@saveTicket')->name('save.ticket');
 
 
 Route::get('/inventaire/index','Inventaire@index')->name('inventaire.index');
+Route::get('/ticket/show','Inventaire@show')->name('ticket.show');
+Route::get('/ticket/delete','Inventaire@supprimer')->name('ticket.delete');

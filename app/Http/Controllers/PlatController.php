@@ -187,19 +187,21 @@ class PlatController extends Controller
 
 
     public function saveTicket(Request $request){
-         $id_ticket = \uniqid();
+         $id_ticket = hexdec(uniqid());
+         //dd($id_ticket);
          ['id_ticket','libelle','qt','prix','date_enreg'];
 
          $date = now()->format('Y-m-d');
-        //  dd($request->ticket);
+         // dd($request->ticket);
         foreach($request->ticket  as $item){
             $data = array('id_ticket'=> $id_ticket, "libelle"=> $item["libelle"] , "qt"=> $item["qt"], "prix"=>$item["prix"],"date_enreg"=>$date);
             $ticket = new Ticket();
             $ticket->create($data);
+            $data = '';
         }
        
 
-        return 0 ;
+        return redirect()->route('home');
        
     }
 }

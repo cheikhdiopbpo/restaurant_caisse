@@ -58,9 +58,11 @@
                                 <div class="row justify-content-between px-5"  id="mycontent">
                                          
                                             @foreach($result as $item)
-                                           
-                                                <div class="block col-md-2.5 text-center" style="width: 15rem;margin-bottom: 15px;" id="{{$item->id}}"   onclick="return checkItem({{$item}});" draggable="true" ondragstart="return retirer({{$item}});">
-                                                    <p class="my-3 prod-name" > {{ strtoupper($item->libelle) }}</p> <img class="image" src="images/{{$item->image}}">
+                                                
+                                                <div class="block col-md-2.5 text-center" style="width: 15rem;margin-bottom: 0px;"  id="{{$item->id}}"   onclick="return checkItem({{$item}});"  >
+                                                    <p><i class="fa fa-plus" class="float-left" style="color:green;zoom:1;" onclick="return ajouter({{$item}});"></i> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-minus" style="color: red;zoom:1;" onclick="return retirer({{$item}});"></i></p>
+                                                   <p class="my-3 prod-name" >{{ strtoupper($item->libelle) }}</p>
+                                                    <img class="image" src="images/{{$item->image}}">
                                                     <div class="price  active">
                                                         <h6 class="mb-0">{{ strtolower($item->prix) }} F cfa</h6>
                                                     </div>
@@ -85,6 +87,11 @@
 var panier = [];
 
 $('#valide').click(function(){
+     var conf = confirm("Confirmer cette commande SVP");
+     if(conf)
+     {
+
+    
     html = "<body>";
     html = html +"<p style='text-align:center;margin-top:5px;'><b>RESTAURANT MAFATIHUL BICHRI<b></p>";
     html = html +"<p style='text-align:center;margin-top:-17px;'>Adresse: Castor</p>";
@@ -102,7 +109,7 @@ $('#valide').click(function(){
     });
     html = html + "</table></div>";
 
-    html = html + "<p style='text-align:right'><b>Total: "+total+" Fcfa</b></p>";
+    html = html + "<p style='text-align:right'><b>Total: "+total+" Fcfa </b></p>";
     html = html + "<body>";
  
     var opt = {
@@ -120,9 +127,11 @@ $('#valide').click(function(){
                 url:"{{ route('save.ticket')}}",
                 data: {'ticket': panier},
                 success:function(data) {
-                 
+                      panier = [];
+                      charge_panier();
                     }
                 });
+            }
 });
 function vider_panier(){
     panier = [];
@@ -146,12 +155,15 @@ function checkItem(item){
              index = key;
            }
       });
-      if(cpt == 1)
+      
+      if(cpt != 1)
       {
-       panier[index].qt =  panier[index].qt + 1 ;
-      }else{
         panier.push(item);
+       //panier[index].qt =  panier[index].qt + 1 ;
       }
+    //   }else{
+    //     panier.push(item);
+    //   }
      
     }else{
         var item = [{"id":data["id"],"libelle":data["libelle"] , "prix" : data["prix"],"qt" : 1}];
@@ -192,6 +204,40 @@ function retirer(item){
 
     charge_panier();
 }
+
+
+function ajouter(item){
+    //console.log(item);
+    data = item;
+     $("#"+data['id']+".block").toggleClass('active');
+     $("#"+data['id']+" .price").removeClass('active');
+     $("#"+data['id']+".price.active").addClass('active');
+   
+    if(panier.length > 0)
+    {
+      var cpt = 0;
+      var index;
+      panier.forEach(function(el,key) {
+           if(el.id == data["id"])
+           {
+             cpt = 1;
+             index = key;
+           }
+      });
+      if(cpt == 1)
+      {
+        if(panier[index].qt >= 0)
+          {
+            panier[index].qt =  panier[index].qt + 1 ;
+          }
+     
+      }
+     
+    }
+
+    charge_panier();
+}
+
 
 
 function charge_panier()
